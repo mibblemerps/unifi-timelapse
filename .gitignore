@@ -13,6 +13,6 @@ yarn-error.log*
 
 dist/
 
-appconfig.json
-timelapses/
-snapshots/
+/appconfig.json
+/timelapses
+/snapshots

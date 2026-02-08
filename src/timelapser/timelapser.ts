@@ -37,7 +37,8 @@ export default class Timelapser {
         this._isRunning = true;
 
         try {
-            await fs.mkdir('timelapses', { recursive: true });
+            await fs.mkdir(this._appconfig.timelapseDirectory, { recursive: true });
+            await fs.mkdir(path.resolve(this._appconfig.timelapseDirectory, 'temp'), { recursive: true });
 
             for (let index = 0; index < this._appconfig.timelapses.length; index++) {
                 const timelapse = this._appconfig.timelapses[index];
@@ -117,8 +118,9 @@ export default class Timelapser {
         if (!newFiles.length) return;
 
         const outputPath = this._getTimelapseOutputPath(index, camera.name ?? camera.id, windowStart);
-        const segmentPath = path.resolve('timelapses', `segment-${index}-${Date.now()}.mkv`);
-        const frameListPath = path.resolve('timelapses', `frames-${index}-${Date.now()}.txt`);
+        const tempDir = path.resolve(this._appconfig.timelapseDirectory, 'temp');
+        const segmentPath = path.resolve(tempDir, `segment-${index}-${Date.now()}.mkv`);
+        const frameListPath = path.resolve(tempDir, `frames-${index}-${Date.now()}.txt`);
 
         await fs.mkdir(path.dirname(outputPath), { recursive: true });
 
@@ -131,8 +133,8 @@ export default class Timelapser {
             await this._createSegment(frameListPath, segmentPath, timelapse);
 
             if (await this._fileExists(outputPath)) {
-                const concatListPath = path.resolve('timelapses', `concat-${index}-${Date.now()}.txt`);
-                const tempOutput = path.resolve('timelapses', `timelapse-${index}-${Date.now()}.mkv`);
+                const concatListPath = path.resolve(tempDir, `concat-${index}-${Date.now()}.txt`);
+                const tempOutput = path.resolve(tempDir, `timelapse-${index}-${Date.now()}.mkv`);
 
                 try {
                     await this._writeConcatList(concatListPath, [outputPath, segmentPath]);
